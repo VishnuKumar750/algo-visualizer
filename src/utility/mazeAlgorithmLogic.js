@@ -4,6 +4,7 @@
 // by backtracking from the finish node.
 export function dijkstra(grid, startNode, finishNode) {
    // console.log("dijkstra", grid, startNode, finishNode);
+   console.log('running');
    const visitedNodesInOrder = [];
    startNode.distance = 0;
    const unvisitedNodes = getAllNodes(grid);
@@ -21,81 +22,6 @@ export function dijkstra(grid, startNode, finishNode) {
      updateUnvisitedNeighbors(closestNode, grid);
    }
  }
-
-export function dfs(grid, startNode, finishNode) {
-   const visitedNodesInOrder = [];
-   const unvisitedNodes = getAllNodes(grid);
-   const stack = [];
-   stack.push(startNode);
-   while (stack.length > 0) {
-      const currentNode = stack.pop();
-      if (currentNode.isWall) continue;
-      if (currentNode.isVisited) continue;
-      currentNode.isVisited = true;
-      visitedNodesInOrder.push(currentNode);
-      if (currentNode === finishNode) return visitedNodesInOrder;
-      const neighbors = getUnvisitedNeighbors(currentNode, grid);
-      for (const neighbor of neighbors) {
-         neighbor.previousNode = currentNode;
-         stack.push(neighbor);
-      }
-   }
-   return visitedNodesInOrder;
-}
-
-export function bfs(grid, startNode, finishNode) {
-   const visitedNodesInOrder = [];
-   const unvisitedNodes = getAllNodes(grid);
-   const queue = [];
-   queue.push(startNode);
-   while (queue.length > 0) {
-      const currentNode = queue.shift();
-      if (currentNode.isWall) continue;
-      if (currentNode.isVisited) continue;
-      currentNode.isVisited = true;
-      visitedNodesInOrder.push(currentNode);
-      if (currentNode === finishNode) return visitedNodesInOrder;
-      const neighbors = getUnvisitedNeighbors(currentNode, grid);
-      for (const neighbor of neighbors) {
-         neighbor.previousNode = currentNode;
-         queue.push(neighbor);
-      }
-   }
-   return visitedNodesInOrder;
-}
-
-export function aStar(grid, startNode, finishNode) {
-   const visitedNodesInOrder = [];
-   const unvisitedNodes = getAllNodes(grid);
-   startNode.distance = 0;
-   while (unvisitedNodes.length > 0) {
-      sortNodesByDistance(unvisitedNodes);
-      const closestNode = unvisitedNodes.shift();
-      if (closestNode.isWall) continue;
-      if (closestNode.distance === Infinity) return visitedNodesInOrder;
-      closestNode.isVisited = true;
-      visitedNodesInOrder.push(closestNode);
-      if (closestNode === finishNode) return visitedNodesInOrder;
-      updateUnvisitedNeighborsAStar(closestNode, finishNode, grid);
-   }
-   return visitedNodesInOrder;
-}
-
-function updateUnvisitedNeighborsAStar(node, finishNode, grid) {
-   const unvisitedNeighbors = getUnvisitedNeighbors(node, grid);
-   for (const neighbor of unvisitedNeighbors) {
-      neighbor.distance = node.distance + 1;
-      neighbor.previousNode = node;
-      neighbor.heuristic = manhattanDistance(neighbor, finishNode);
-   }
-}
-
-function manhattanDistance(node, finishNode) {
-   const x = Math.abs(node.col - finishNode.col);
-   const y = Math.abs(node.row - finishNode.row);
-   return x + y;
-}
-
 
  
  function sortNodesByDistance(unvisitedNodes) {
@@ -135,7 +61,7 @@ function manhattanDistance(node, finishNode) {
  export function getNodesInShortestPathOrder(finishNode) {
    const nodesInShortestPathOrder = [];
    let currentNode = finishNode;
-   while (currentNode !== null) {
+   while (currentNode !== null && !currentNode.isWall) {
      nodesInShortestPathOrder.unshift(currentNode);
      currentNode = currentNode.previousNode;
    }
