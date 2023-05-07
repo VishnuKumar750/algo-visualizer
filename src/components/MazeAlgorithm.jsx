@@ -9,6 +9,9 @@ import { astarSearch } from '../utility/AStar';
 import { generateRecursiveDivision } from '../utility/Maze/randomMaze';
 import { generateRecursiveBacktracking } from '../utility/Maze/RecursiveBacktracking';
 import { generateEllers } from '../utility/Maze/Ellers';
+import { generatePrims } from '../utility/Maze/RandomPrims';
+import { RecursiveDivisonHorizontal } from '../utility/Maze/RecursiveDivisionH';
+import { bfs } from '../utility/PathFindingAlgo/BFS';
 
 const MazeAlgorithm = () => {
   const [ rows, setRows ] = useState(18); 
@@ -32,22 +35,22 @@ const MazeAlgorithm = () => {
     function HandleResize () {
       if(window.innerWidth < 768) {
         setCols(20);
-        setRows(16);
+        setRows(15);
         setStartIndex({row: 8, col: 2});
         setFinishIndex({row: 8, col: 17})
       } else if(window.innerWidth > 768 && window.innerWidth < 1023) {
         setCols(30);
-        setRows(16);
+        setRows(17);
         setStartIndex({row: 8, col: 2});
         setFinishIndex({row: 8, col: 27})
       } else if(window.innerWidth > 1024) {
         setCols(50);
-        setRows(16);
+        setRows(17);
         setStartIndex({row: 8, col: 12});
         setFinishIndex({row: 8, col: 37})
       } else {
         setCols(50);
-        setRows(16);
+        setRows(17);
         setStartIndex({row: 8, col: 12});
         setFinishIndex({row: 8, col: 37})
       }
@@ -244,6 +247,7 @@ const MazeAlgorithm = () => {
     // console.log(board);
     if(options === '0') {
       console.log('BFS');
+      visualizeBfs();
     } else if(options === '1') {
       console.log('DFS');
       visualizeDfs();
@@ -335,6 +339,23 @@ function clearPathFinding() {
 
   setArray(clearedArr);
 }
+function visualizeBfs() {
+  console.log('visualizeBfs');
+  const startNode = array[startIndex.row][startIndex.col];
+  const finishNode = array[finishIndex.row][finishIndex.col];
+
+  clearPathFinding();
+  setTimeout(() => {
+    
+  }, 2000);
+
+  const visitedNodes = bfs(array, startNode, finishNode);
+  // const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
+
+  const { path, walls } = visitedNodes;
+  // console.log(walls);
+  animateAlgorithm(walls, path);
+}
 
 
 // animate the algorithm
@@ -348,6 +369,7 @@ function animateAlgorithm(visitedNodes, nodesInShortestPathOrder) {
     }
     setTimeout(() => {
       const node = visitedNodes[i];
+      // console.log('node' , node);
       document.getElementById(`node-${node.row}-${node.col}`).className='node-visited';
   }, 20 * i);
   }
@@ -395,16 +417,18 @@ function visualizeRecursiveBacktracking() {
   animateMaze(generatedMaze);
 }
 
-// function visualizeRandomPrims() {
-//   const newArr = resetWalls();
+function visualizeRandomPrims() {
+  const newArr = resetWalls();
 
-//   const startNode = array[startIndex.row][startIndex.col];
-//   const finishNode = array[finishIndex.row][finishIndex.col];
+  const startNode = array[startIndex.row][startIndex.col];
+  const finishNode = array[finishIndex.row][finishIndex.col];
 
-//   const generatedMaze = generateRandomPrims(newArr, startNode, finishNode);
+  const generatedMaze = generatePrims(array, rows, cols, startNode, finishNode);
 
-//   animateMaze(generatedMaze);
-// }
+  // console.log(generatedMaze);
+  setArray(array);
+  animateMaze(generatedMaze);
+}
 
 function visualizeEller() {
   resetWalls();
@@ -419,7 +443,18 @@ function visualizeEller() {
   animateMaze(generatedMaze);
 }
 
-function visualizeRandomKruskal() {}
+function visualizeRecusiveDivisonHorizontal() {
+  resetWalls();
+
+  const startNode = array[startIndex.row][startIndex.col];
+  const finishNode = array[finishIndex.row][finishIndex.col];
+
+  const generatedMaze = RecursiveDivisonHorizontal(array, array.length, array[0].length, startNode, finishNode);
+
+  // console.log(generatedMaze);
+  setArray(array);
+  animateMaze(generatedMaze);
+}
 
 
 const handleMaze  = (e) => {
@@ -440,7 +475,7 @@ const handleMaze  = (e) => {
       setMazeOptions(-1);
       break;
     case "2":
-      // visualizeRandomPrims();
+      visualizeRandomPrims();
       setMazeOptions(-1);
       break;
     case "3":
@@ -448,7 +483,7 @@ const handleMaze  = (e) => {
       setMazeOptions(-1);
       break;
     case "4":
-      visualizeRandomKruskal();
+      visualizeRecusiveDivisonHorizontal();
       setMazeOptions(-1);
       break;
     default: 
@@ -495,13 +530,13 @@ function animateMaze(generatedMaze) {
       const node = generatedMaze[i];
       // console.log(node);
         document.getElementById(`node-${node.row}-${node.col}`).classList.add('wall');
-    }, 30 * i);
+    }, 12 * i);
 
     if(i === generatedMaze.length - 1) {
       setTimeout(() => {
         console.log('Maze Created');
         setIsRunning(false);
-      }, 30 * i);
+      }, 12 * i);
     } 
   }
 
@@ -533,19 +568,19 @@ const Nothing = () => {
       </select>
 
       <select className="px-2 text-md font-medium outline-none py-2 border-[#404258] mx-4
-      bg-transparent  text-[#404258] border-b-2
+      bg-transparent  text-[#404258] border-b-2  text-center
       "
       value={MazeOptions}
       onChange={(e) => setMazeOptions(e.target.value)}
       onClick={handleMaze}
       >
-        <option value={-1} className='text-black text-center'>Generate Mazes</option>
+        <option value={-1} className='text-black '>Generate Mazes</option>
         <option value={0}  
      className='text-black'>Recursive Division</option>
         <option value={1} className='text-black'>Recursive Backtracking</option>
-        <option value={2} className='text-black'>Randomized Prims</option>
+        <option value={2} className='text-black'>Randomized Pattern</option>
         <option value={3} className='text-black'>Ellers Algorithm</option>
-        <option value={4} className='text-black'>Krushkals Algorithm</option>
+        <option value={4} className='text-black'>Recurive Divison(Horizontal)</option>
       </select>
       </div>
 

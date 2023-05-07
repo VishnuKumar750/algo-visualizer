@@ -1,5 +1,15 @@
 export function dfs(grid, startNode, finishNode) {
-   const visitedNodesInOrder = [];
+  // reset the grid to its original state
+    for(let i = 0; i < grid.length; i++) {
+      for(let j = 0; j < grid[0].length; j++) {
+        grid[i][j].isVisited = false;
+        grid[i][j].previousNode = null;
+        grid[i][j].distance = Infinity;
+      }
+    }
+
+  
+  const visitedNodesInOrder = [];
    const stack = [startNode];
    while (stack.length !== 0) {
      const currentNode = stack.pop();

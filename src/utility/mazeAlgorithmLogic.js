@@ -5,6 +5,18 @@
 export function dijkstra(grid, startNode, finishNode) {
    // console.log("dijkstra", grid, startNode, finishNode);
    console.log('running');
+
+  //  reset the grid to its original state
+    for(let i = 0; i < grid.length; i++) {
+      for(let j = 0; j < grid[0].length; j++) {
+        grid[i][j].distance = Infinity;
+        grid[i][j].isVisited = false;
+        grid[i][j].previousNode = null;
+      }
+    }
+    
+
+
    const visitedNodesInOrder = [];
    startNode.distance = 0;
    const unvisitedNodes = getAllNodes(grid);
