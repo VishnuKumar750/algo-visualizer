@@ -345,9 +345,7 @@ function visualizeBfs() {
   const finishNode = array[finishIndex.row][finishIndex.col];
 
   clearPathFinding();
-  setTimeout(() => {
-    
-  }, 2000);
+  
 
   const visitedNodes = bfs(array, startNode, finishNode);
   // const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
@@ -356,7 +354,6 @@ function visualizeBfs() {
   // console.log(walls);
   animateAlgorithm(walls, path);
 }
-
 
 // animate the algorithm
 function animateAlgorithm(visitedNodes, nodesInShortestPathOrder) {
@@ -402,6 +399,9 @@ function visualizeRecursiveDivison() {
 
   // console.log('generatedMaze', generatedMaze);
   setArray(array);
+  setTimeout(() => {
+    
+  }, 2000);
   animateMaze(generatedMaze);
 }
 

@@ -1,86 +1,88 @@
 export function generateRecursiveBacktracking(grid, startIndex, finishIndex) {
    let walls = [];
- 
-   // Add boundary walls
-   for (let row = 0; row < grid.length; row++) {
-     for (let col = 0; col < grid[0].length; col++) {
-       if (row === 0 || row === grid.length - 1 || col === 0 || col === grid[0].length - 1) {
-         walls.push({ row, col });
-         grid[row][col].isWall = true;
-       }
-     }
-   }
- 
-   // Add inner walls using recursive backtracking
-   const stack = [{ row: 1, col: 1 }];
-   while (stack.length) {
-     const current = stack[stack.length - 1];
-     grid[current.row][current.col].isVisited = true;
- 
-     const neighbors = getUnvisitedNeighbors(grid, current);
-     if (neighbors.length) {
-       const randomNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
-       removeWallBetween(grid, current, randomNeighbor);
-       stack.push(randomNeighbor);
-     } else {
-       stack.pop();
-     }
-   }
- 
-   // Add random walls
-   for (let row = 2; row < grid.length - 2; row++) {
-     for (let col = 2; col < grid[0].length - 2; col++) {
-       if (Math.random() < 0.3) {
-         const wall = { row, col };
-         if (
-           (row === startIndex.row && col === startIndex.col) ||
-           (row === finishIndex.row && col === finishIndex.col)
-         ) {
-           continue;
-         }
-         walls.push(wall);
-         grid[row][col].isWall = true;
-       }
-     }
-   }
- 
+  
+    const maze = recursiveBacktracking(grid.length, grid[0].length);
+
+    maze[startIndex.row][startIndex.col] = 1;
+    maze[finishIndex.row][finishIndex.col] = 1;
+
+    for(let i = 0; i < maze.length; i++) {
+        for(let j = 0; j < maze[0].length; j++) {
+            if(maze[i][j] === 0) {
+                grid[i][j].isWall = true;
+                walls.push({row: i, col: j});
+            }
+        }
+    }
+  
+  console.log(walls);
+
    return walls;
  }
  
- function getUnvisitedNeighbors(grid, node) {
-   const neighbors = [];
-   const { row, col } = node;
  
-   if (row > 2 && !grid[row - 2][col].isVisited) {
-     neighbors.push({ row: row - 2, col: col });
-   }
-   if (col > 2 && !grid[row][col - 2].isVisited) {
-     neighbors.push({ row: row, col: col - 2 });
-   }
-   if (row < grid.length - 3 && !grid[row + 2][col].isVisited) {
-     neighbors.push({ row: row + 2, col: col });
-   }
-   if (col < grid[0].length - 3 && !grid[row][col + 2].isVisited) {
-     neighbors.push({ row: row, col: col + 2 });
-   }
+ function recursiveBacktracking(rows, cols) {
+  const maze = Array(rows)
+     .fill()
+     .map(() => Array(cols).fill(1)); // initialize the maze with walls
  
-   return neighbors;
+   const visited = Array(rows)
+     .fill()
+     .map(() => Array(cols).fill(false)); // initialize the visited flag
+
+   // make boundary around maze
+   for(let i=0; i<rows; i++) {
+      maze[i][0] = 0;
+      visited[i][0] = true;
+      maze[i][cols-1] = 0;
+      visited[i][cols-1] = true;
+   }
+
+   for(let i=0; i<cols; i++) {
+      maze[0][i] = 0;
+      visited[0][i] = true;
+      maze[rows-1][i] = 0;
+      visited[rows-1][i] = true;
+   }
+   visited[2][2] = true; // choose a random starting cell and mark it as visited
+   maze[2][2] = 1; // mark the starting cell in the maze
+
+   const stack = [[2, 2]]; // use a stack to keep track of the backtracking
+  //  walls.push({row: 2, col: 2});
+ 
+   while (stack.length) {
+     const [row, col] = stack[stack.length - 1]; // get the current cell from the top of the stack
+     
+     
+       const potentialNeighbours = [
+         [row - 2, col],
+         [row, col + 2],
+         [row + 2, col],
+         [row, col - 2],
+         ]; // get all the potential neighbours
+
+         const neighbours = potentialNeighbours.filter(
+            ([row, col]) =>
+               row > 0 &&
+               row < rows - 1 &&
+               col > 0 &&
+               col < cols - 1 &&
+               !visited[row][col]
+         ); // get the neighbours that are within the maze and have not been visited
+
+         if (neighbours.length) {
+            const chosenIndex = Math.floor(Math.random() * neighbours.length); // choose a random neighbour
+            const [row, col] = neighbours[chosenIndex];
+            maze[row][col] = 0; // mark the neighbour as visited
+            visited[row][col] = true;
+            // walls.push({row: row, col: col});
+            maze[row + Math.sign(row - stack[stack.length - 1][0])][col + Math.sign(col - stack[stack.length - 1][1])] = 0; // mark the cell between the neighbour and the current cell as visited
+            stack.push([row, col]); // push the neighbour to the stack
+         }
+         else {
+            stack.pop(); // if there are no neighbours pop the stack
+         }
+   }
+
+   return maze;
  }
- 
- function removeWallBetween(grid, nodeA, nodeB) {
-   const rowDiff = nodeA.row - nodeB.row;
-   const colDiff = nodeA.col - nodeB.col;
- 
-   if (rowDiff === 0) {
-     if (colDiff > 0) {
-       grid[nodeA.row][nodeA.col - 1].isWall = false;
-     } else {
-       grid[nodeA.row][nodeA.col + 1].isWall = false;
-     }
-   } else if (rowDiff > 0) {
-     grid[nodeA.row - 1][nodeA.col].isWall = false;
-   } else {
-     grid[nodeA.row + 1][nodeA.col].isWall = false;
-   }
- }
- 
