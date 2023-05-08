@@ -15,9 +15,9 @@ export function generateRecursiveBacktracking(grid, startIndex, finishIndex) {
         }
     }
   
-  console.log(walls);
+//   console.log(walls);
 
-   return walls;
+   return { walls, grid };
  }
  
  

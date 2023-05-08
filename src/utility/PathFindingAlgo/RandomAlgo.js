@@ -1,7 +1,6 @@
-export function bfs(grid, startIndex, finishIndex) {
+export function generatePath(grid, startIndex, finishIndex) {
+   console.log('random algo', grid);
    let maze = [];
-
-   // console.log('bfs', grid);
 
    for (let i = 0; i < grid.length; i++) {
       maze[i] = [];
@@ -26,11 +25,13 @@ export function bfs(grid, startIndex, finishIndex) {
    let found = false;
 
    while (stack.length > 0) {
-      const curr = stack.shift();
+      const curr = stack.pop();
       const currRow = curr[0];
       const currCol = curr[1];
 
+
       if(visited[currRow][currCol]) {
+         visitedNodesInOrder.push({ row: curr[0], col: curr[1], ...curr, backtrack: true });
          continue;
       }
 
@@ -59,8 +60,8 @@ export function bfs(grid, startIndex, finishIndex) {
       shortestPath = getshortestPath(visitedNodesInOrder, curr, startIndex);
    }
 
-   // console.log(shortestPath);
-   // console.log(visitedNodesInOrder);
+   console.log(shortestPath);
+   console.log(visitedNodesInOrder);
 
    return { visitedNodesInOrder, shortestPath };
 }
@@ -71,8 +72,8 @@ function getAllNeighbors(maze, row, col) {
 
    if (row > 0  && maze[row-1][col] !== 1) unvisitedNeighbors.push([row - 1, col]);
    if (row < maze.length - 1 && maze[row+1][col] !== 1) unvisitedNeighbors.push([row + 1, col]);
-   if (col > 0  && maze[row][col - 1] !== 1 ) unvisitedNeighbors.push([row, col - 1]);
-   if (col < maze[0].length - 1 && maze[row][col + 1] !== 1 ) unvisitedNeighbors.push([row, col + 1]);
+   if (col > 0  && maze[row][col - 1] !== 1) unvisitedNeighbors.push([row, col - 1]);
+   if (col < maze[0].length - 1 && maze[row][col + 1] !== 1) unvisitedNeighbors.push([row, col + 1]);
 
    return unvisitedNeighbors;
 }

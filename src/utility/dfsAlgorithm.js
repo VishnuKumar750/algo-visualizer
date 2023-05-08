@@ -1,50 +1,106 @@
-export function dfs(grid, startNode, finishNode) {
-  // reset the grid to its original state
-    for(let i = 0; i < grid.length; i++) {
-      for(let j = 0; j < grid[0].length; j++) {
-        grid[i][j].isVisited = false;
-        grid[i][j].previousNode = null;
-        grid[i][j].distance = Infinity;
-      }
-    }
+export function dfs(grid, startIndex, finishIndex) {
+  let maze = [];
 
-  
-  const visitedNodesInOrder = [];
-   const stack = [startNode];
-   while (stack.length !== 0) {
-     const currentNode = stack.pop();
-     if (currentNode.isVisited) continue;
-
-     currentNode.isVisited = true;
-     visitedNodesInOrder.push(currentNode);
-     if (currentNode === finishNode) return visitedNodesInOrder;
-     const unvisitedNeighbors = getUnvisitedNeighbors(currentNode, grid);
-     for (const neighbor of unvisitedNeighbors) {
-       neighbor.previousNode = currentNode;
-       stack.push(neighbor);
+  for (let i = 0; i < grid.length; i++) {
+     maze[i] = [];
+     for (let j = 0; j < grid[0].length; j++) {
+        maze[i][j] = grid[i][j].isWall ? 1 : 0;
      }
-   }
-   
-   return visitedNodesInOrder;
- }
- 
- function getUnvisitedNeighbors(node, grid) {
-   const neighbors = [];
-   const { row, col } = node;
-   if (row > 0) neighbors.push(grid[row - 1][col]);
-   if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
-   if (col > 0) neighbors.push(grid[row][col - 1]);
-   if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
-   return neighbors.filter(neighbor => !neighbor.isVisited && !neighbor.isWall);
- }
- 
-export function getShortestPath(finishNode) {
-   const shortestPath = [];
-   let currentNode = finishNode;
-   while (currentNode !== null) {
-     shortestPath.unshift(currentNode);
-     currentNode = currentNode.previousNode;
-   }
-   return shortestPath;
- }
- 
+  }
+
+  maze[startIndex.row][startIndex.col] = 2;
+  maze[finishIndex.row][finishIndex.col] = 3;
+
+
+  let visited = Array(grid.length).fill().map(() => Array(grid[0].length).fill(false));
+
+  let visitedNodesInOrder = [];
+  let shortestPath = [];
+
+
+  let stack = [];
+  stack.push([startIndex.row, startIndex.col]);
+
+  let found = false;
+
+  while (stack.length > 0) {
+     const curr = stack.pop();
+     const currRow = curr[0];
+     const currCol = curr[1];
+
+
+     if(visited[currRow][currCol]) {
+        visitedNodesInOrder.push({ row: curr[0], col: curr[1], ...curr, backtrack: true });
+        continue;
+     }
+
+     if(currRow === finishIndex.row && currCol === finishIndex.col) {
+        found = true;
+        visitedNodesInOrder.push({ row: curr[0], col: curr[1], ...curr, backtrack: false });
+        break;
+     }
+
+     visitedNodesInOrder.push({ row: curr[0], col:curr[1], ...curr , backtrack: false });
+     visited[currRow][currCol] = true;
+
+     const neighbors = getAllNeighbors(maze, currRow, currCol, visited);
+     for(let i = 0; i < neighbors.length; i++) {
+        const neighbor = neighbors[i];
+        neighbor.previousNode = { row: currRow, col: currCol };
+        stack.push(neighbor);
+     }
+  }
+
+  if(found) {
+     console.log("found");
+     // find the visited Nodes shortest path
+     let curr = visitedNodesInOrder[visitedNodesInOrder.length - 1];
+     // console.log(curr);
+     shortestPath = getshortestPath(visitedNodesInOrder, curr, startIndex);
+  }
+
+  console.log(shortestPath);
+  console.log(visitedNodesInOrder);
+
+  return { visitedNodesInOrder, shortestPath };
+}
+
+
+function getAllNeighbors(maze, row, col) {
+  const unvisitedNeighbors = [];
+
+  if (row > 0  && maze[row-1][col] !== 1) unvisitedNeighbors.push([row - 1, col]);
+  if (row < maze.length - 1 && maze[row+1][col] !== 1) unvisitedNeighbors.push([row + 1, col]);
+  if (col > 0  && maze[row][col - 1] !== 1) unvisitedNeighbors.push([row, col - 1]);
+  if (col < maze[0].length - 1 && maze[row][col + 1] !== 1) unvisitedNeighbors.push([row, col + 1]);
+
+  return unvisitedNeighbors;
+}
+
+function getshortestPath(visitedNodesInOrder, curr, startIndex) {
+  let shortestPath = [];
+  let row = curr.row;
+  let col = curr.col;
+  let previousNode = curr.previousNode;
+
+  while(!(row === startIndex.row && col === startIndex.col)) {
+     // console.log(curr.row, curr.col, curr.previousNode);
+     // console.log('started');
+     shortestPath.unshift({ row: row, col: col });
+
+     let currNode = visitedNodesInOrder.filter((node) => {
+        if(node.row === previousNode.row && node.col === previousNode.col) {
+           return node;
+        }
+     }
+     )[0];
+
+     row = currNode.row;
+     col = currNode.col;
+     previousNode = currNode.previousNode;
+  }
+
+  shortestPath.unshift({ row: startIndex.row, col: startIndex.col });
+
+  return shortestPath;
+}
