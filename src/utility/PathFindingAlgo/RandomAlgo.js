@@ -1,5 +1,5 @@
 export function generatePath(grid, startIndex, finishIndex) {
-   console.log('random algo', grid);
+   // console.log('random algo', grid);
    let maze = [];
 
    for (let i = 0; i < grid.length; i++) {

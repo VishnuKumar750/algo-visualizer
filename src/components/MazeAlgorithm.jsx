@@ -136,7 +136,7 @@ const MazeAlgorithm = () => {
       try {
       // console.log(node);   
       if(dragStart)  {
-        console.log('drag start');
+        // console.log('drag start');
         // console.log('mouse move', row, col);
         setPos(prev => ({...prev, row, col}));
 
@@ -278,20 +278,20 @@ const MazeAlgorithm = () => {
         clearPathFinding();
     }
 
-    console.log('array', array);
+    // console.log('array', array);
     // console.log(board);
-    console.log(options);
+    // console.log(options);
     if(options === "3") {
-      console.log('BFS');
+      // console.log('BFS');
       visualizeBfs();
     } else if(options === "2") {
-      console.log('DFS');
+      // console.log('DFS');
       visualizeDfs();
     } else if(options === "0") {
-      console.log('Dijakstra');
+      // console.log('Dijakstra');
       visualizeDijkstra();
     } else if(options === '1') {
-      console.log('A* Search');
+      // console.log('A* Search');
       visualizeAStarSearch()
     } else if(options === '4') {
       visualizeRandomAlgo();
@@ -320,38 +320,32 @@ function visualizeAStarSearch() {
   const startNode = array[startIndex.row][startIndex.col];
   const finishNode = array[finishIndex.row][finishIndex.col];
 
-  setTimeout(() => {
     const { visitedNodesInOrder, shortestPath } = astarSearch(array, startNode, finishNode);
     animateAlgorithm(visitedNodesInOrder, shortestPath);    
-  }, 2000);
-  
 }
 function visualizeDijkstra() {
   const startNode = array[startIndex.row][startIndex.col];
   const finishNode = array[finishIndex.row][finishIndex.col];
 
-  setTimeout(() => {
     const visitedNodes = dijkstra(array, startNode, finishNode);
     // console.log(visitedNodes);
     const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
     animateAlgorithm(visitedNodes, nodesInShortestPathOrder);
-      }, 2000);
+  
 }
 function visualizeDfs() {
   // console.log(startIndex, finishIndex);
   const startNode = array[startIndex.row][startIndex.col];
   const finishNode = array[finishIndex.row][finishIndex.col];
 
-  setTimeout(() => {
     const { visitedNodesInOrder, shortestPath} = dfs(array, startNode, finishNode);
-    animateAlgorithm(visitedNodesInOrder, shortestPath);
-  }, 500);
-  
+    animateAlgorithm(visitedNodesInOrder, shortestPath); 
 }
+
 function clearPathFinding() {
   const newArr = [...array];
   
-  console.log('cleared', newArr);
+  // console.log('cleared', newArr);
   // clear all the visited nodes and shortest path
   for(let i = 0; i < newArr.length; i++) {
     for(let j = 0; j < newArr[0].length; j++) {
@@ -365,12 +359,10 @@ function clearPathFinding() {
 
 function visualizeBfs() {
   try {
-    console.log('visualizeBfs');
+    // console.log('visualizeBfs');
     const startNode = array[startIndex.row][startIndex.col];
     const finishNode = array[finishIndex.row][finishIndex.col];
   
-    clearPathFinding();
-
     const { visitedNodesInOrder, shortestPath} = bfs(array, startNode, finishNode);
       // console.log(walls);
       animateAlgorithm(visitedNodesInOrder, shortestPath);  
@@ -383,22 +375,30 @@ function visualizeBfs() {
 
 // animate the algorithm
 const animateAlgorithm = (visitedNodes, nodesInShortestPathOrder) => {
-  for (let i = 0; i <= visitedNodes.length; i++) {
-    if (i === visitedNodes.length) {
+  try {
+    for (let i = 0; i <= visitedNodes.length; i++) {
+      if (i === visitedNodes.length) {
+        setTimeout(() => {
+          animateShortestPath(nodesInShortestPathOrder);
+        }, 10 * i);
+        return;
+      }
       setTimeout(() => {
-        animateShortestPath(nodesInShortestPathOrder);
+        const node = visitedNodes[i];
+         if(node.backtrack) {
+          document.getElementById(`node-${node.row}-${node.col}`).className='node-backtrack';
+          }
+          else {
+            document.getElementById(`node-${node.row}-${node.col}`).className='node-visited';
+          }
       }, 10 * i);
-      return;
     }
+  } catch (error) {
+    console.log('some thing went wrong');
+  } finally {
     setTimeout(() => {
-      const node = visitedNodes[i];
-       if(node.backtrack) {
-        document.getElementById(`node-${node.row}-${node.col}`).className='node-backtrack';
-        }
-        else {
-          document.getElementById(`node-${node.row}-${node.col}`).className='node-visited';
-        }
-    }, 10 * i);
+      setIsRunning(false);
+    }, 5000);
   }
 };
 
@@ -445,12 +445,10 @@ function visualizeRecursiveBacktracking() {
   const startNode = array[startIndex.row][startIndex.col];
   const finishNode = array[finishIndex.row][finishIndex.col];
 
-  setTimeout(() => {
     const { walls, grid } = generateRecursiveBacktracking(array, startNode, finishNode);
 
     setArray(grid);
     animateMaze(walls);
-  }, 200);
   
 
 }
@@ -487,7 +485,6 @@ function visualizeRecusiveDivisonHorizontal() {
   setArray(array);
   animateMaze(generatedMaze);
 }
-
 
 const handleMaze  = (e) => {
   e.preventDefault();
@@ -543,7 +540,6 @@ function resetWalls() {
       }
     }
 
-    console.log('reset');
 }
 
 function animateMaze(generatedMaze) {
@@ -565,7 +561,7 @@ function animateMaze(generatedMaze) {
 
 }
 
-useEffect(() => { console.log(isRunning);}, [isRunning]);
+// useEffect(() => { console.log(isRunning);}, [isRunning]);
 
 const Nothing = () => {
   console.log('Nothing');

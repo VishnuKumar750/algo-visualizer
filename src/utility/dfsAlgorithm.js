@@ -52,15 +52,15 @@ export function dfs(grid, startIndex, finishIndex) {
   }
 
   if(found) {
-     console.log("found");
+    //  console.log("found");
      // find the visited Nodes shortest path
      let curr = visitedNodesInOrder[visitedNodesInOrder.length - 1];
      // console.log(curr);
      shortestPath = getshortestPath(visitedNodesInOrder, curr, startIndex);
   }
 
-  console.log(shortestPath);
-  console.log(visitedNodesInOrder);
+  // console.log(shortestPath);
+  // console.log(visitedNodesInOrder);
 
   return { visitedNodesInOrder, shortestPath };
 }
