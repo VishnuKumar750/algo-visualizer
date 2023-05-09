@@ -3,9 +3,9 @@ import { BiReset } from 'react-icons/bi';
 import { FaPlay } from 'react-icons/fa';
 
 import './MazeAlgorithm.css';
-import {  dijkstra, getNodesInShortestPathOrder } from '../utility/mazeAlgorithmLogic';
-import { dfs } from '../utility/dfsAlgorithm';
-import { astarSearch } from '../utility/AStar';
+import {  dijkstra } from '../utility/PathFindingAlgo/Dijkstra';
+import { dfs } from '../utility/PathFindingAlgo/dfsAlgorithm';
+import { astarSearch } from '../utility/PathFindingAlgo/AStar';
 import { generateRecursiveDivision } from '../utility/Maze/randomMaze';
 import { generateRecursiveBacktracking } from '../utility/Maze/RecursiveBacktracking';
 import { generateEllers } from '../utility/Maze/Ellers';
@@ -23,8 +23,6 @@ const Algorithms = [
   { name: 'Random Algo', value: 4 },
 ]
 
-
-
 const MazeAlgorithm = () => {
   const [ rows, setRows ] = useState(18); 
   const [cols, setCols] = useState(15);
@@ -41,6 +39,9 @@ const MazeAlgorithm = () => {
     row: 8,
     col: 17,
   });
+
+  const [ speed, setSpeed ] = useState(12);
+  const [animationSpeed, setAnimationSpeed] = useState(16)
 
   // set the state of rows and cols for responsive screens
   useEffect(() => {
@@ -78,15 +79,15 @@ const MazeAlgorithm = () => {
   // Intializing the board with rows and cols
   useMemo(() => { 
     // Intializing the board
-    const board = getInitialGrid(rows, cols, startIndex, finishIndex)
-    setArray(board);
+    const createBoard = () => { 
+      const board = getInitialGrid(rows, cols, startIndex, finishIndex)
+      setArray(board);
+    }
+    createBoard();
   },[ rows, cols])
 
-
-  // useEffect(() => { console.log('array', array)}, [array]);
-
   // Drag and drop Feature
-  const handleClick = useCallback((e, row, col, node) => {
+  const handleClick = (e, row, col, node) => {
     e.preventDefault();
     // set the property of iswall to true
     const { isStart, isFinish, isWall } = node;
@@ -95,11 +96,10 @@ const MazeAlgorithm = () => {
     
 
   const Arr = [...array];
-
-  // console.log(newArr);
     // set the wall to true
   if(!isWall) {
     Arr[row][col].isWall = true;
+    document.getElementById(`node-${row}-${col}`).classList.remove('node-visited', 'node-shortest-path', 'node-backtrack');
     document.getElementById(`node-${row}-${col}`).classList.add('wall');
   } else {
     Arr[row][col].isWall = false;
@@ -108,8 +108,7 @@ const MazeAlgorithm = () => {
 
 
   setArray(Arr);
-
-  },[array])
+  }
 
   const [pos, setPos] = useState({row: 0, col: 0 });
 
@@ -272,15 +271,10 @@ const MazeAlgorithm = () => {
   
 // handle Run Button
   const handleRun = () => {
-    setIsRunning(true);
-
     if(options !== "-1") {
         clearPathFinding();
     }
 
-    // console.log('array', array);
-    // console.log(board);
-    // console.log(options);
     if(options === "3") {
       // console.log('BFS');
       visualizeBfs();
@@ -317,29 +311,70 @@ function visualizeRandomAlgo() {
 
 // Visualize the algorithm
 function visualizeAStarSearch() {
+  setIsRunning(true);
   const startNode = array[startIndex.row][startIndex.col];
   const finishNode = array[finishIndex.row][finishIndex.col];
 
-    const { visitedNodesInOrder, shortestPath } = astarSearch(array, startNode, finishNode);
-    animateAlgorithm(visitedNodesInOrder, shortestPath);    
+  const { visitedNodesInOrder, shortestPath } = astarSearch(array, startNode, finishNode);
+  
+  if(visitedNodesInOrder.length === 0) {
+    setIsRunning(false);
+    return;
+  }
+
+  animateAlgorithm(visitedNodesInOrder, shortestPath);    
 }
 function visualizeDijkstra() {
+  setIsRunning(true);
+
   const startNode = array[startIndex.row][startIndex.col];
   const finishNode = array[finishIndex.row][finishIndex.col];
 
-    const visitedNodes = dijkstra(array, startNode, finishNode);
-    // console.log(visitedNodes);
-    const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
-    animateAlgorithm(visitedNodes, nodesInShortestPathOrder);
+  const { visitedNodesInOrder, shortestPath} = dijkstra(array, startNode, finishNode);
+    // console.log(visitedNodesInOrder, shortestPath);
+
+  if(visitedNodesInOrder.length === 0) {
+    setIsRunning(false);
+    return;
+  }
+
+  animateAlgorithm(visitedNodesInOrder, shortestPath);
   
 }
 function visualizeDfs() {
+  setIsRunning(true);
   // console.log(startIndex, finishIndex);
   const startNode = array[startIndex.row][startIndex.col];
   const finishNode = array[finishIndex.row][finishIndex.col];
 
-    const { visitedNodesInOrder, shortestPath} = dfs(array, startNode, finishNode);
-    animateAlgorithm(visitedNodesInOrder, shortestPath); 
+  const { visitedNodesInOrder, shortestPath} = dfs(array, startNode, finishNode);
+
+  if(visitedNodesInOrder.length === 0) {
+    setIsRunning(false);
+    return;
+  }
+
+  animateAlgorithm(visitedNodesInOrder, shortestPath); 
+}
+
+function visualizeBfs() {
+  setIsRunning(true);
+  try {
+    // console.log('visualizeBfs');
+    const startNode = array[startIndex.row][startIndex.col];
+    const finishNode = array[finishIndex.row][finishIndex.col];
+  
+    const { visitedNodesInOrder, shortestPath} = bfs(array, startNode, finishNode);
+      // console.log(walls);
+    if(visitedNodesInOrder.length === 0) {
+      setIsRunning(false);
+      return;
+    }
+
+    animateAlgorithm(visitedNodesInOrder, shortestPath);  
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 function clearPathFinding() {
@@ -357,22 +392,6 @@ function clearPathFinding() {
   }
 }
 
-function visualizeBfs() {
-  try {
-    // console.log('visualizeBfs');
-    const startNode = array[startIndex.row][startIndex.col];
-    const finishNode = array[finishIndex.row][finishIndex.col];
-  
-    const { visitedNodesInOrder, shortestPath} = bfs(array, startNode, finishNode);
-      // console.log(walls);
-      animateAlgorithm(visitedNodesInOrder, shortestPath);  
-  } catch (error) {
-    console.log(error);
-  } finally {
-    setIsRunning(false);
-  } 
-}
-
 // animate the algorithm
 const animateAlgorithm = (visitedNodes, nodesInShortestPathOrder) => {
   try {
@@ -380,7 +399,7 @@ const animateAlgorithm = (visitedNodes, nodesInShortestPathOrder) => {
       if (i === visitedNodes.length) {
         setTimeout(() => {
           animateShortestPath(nodesInShortestPathOrder);
-        }, 10 * i);
+        }, animationSpeed * i);
         return;
       }
       setTimeout(() => {
@@ -391,7 +410,7 @@ const animateAlgorithm = (visitedNodes, nodesInShortestPathOrder) => {
           else {
             document.getElementById(`node-${node.row}-${node.col}`).className='node-visited';
           }
-      }, 10 * i);
+      }, animationSpeed * i);
     }
   } catch (error) {
     console.log('some thing went wrong');
@@ -408,18 +427,19 @@ function animateShortestPath(nodesInShortestPathOrder) {
       const node = nodesInShortestPathOrder[i];
       document.getElementById(`node-${node.row}-${node.col}`).className =
         'node-shortest-path';
-    }, 50 * i);
+    }, animationSpeed * i);
 
     if(i === nodesInShortestPathOrder.length - 1) {
       setTimeout(() => {
         setIsRunning(false);
-      }, 50 * i);
+      }, animationSpeed * i);
     }
   }
 }
-
 // Maze Section
 function visualizeRecursiveDivison() {
+  setIsRunning(true);
+
   // reset the walls
   resetWalls();
   clearPathFinding();
@@ -427,17 +447,21 @@ function visualizeRecursiveDivison() {
   const startNode = array[startIndex.row][startIndex.col];
   const finishNode = array[finishIndex.row][finishIndex.col];
 
-  const generatedMaze = generateRecursiveDivision(array, rows, cols, startNode, finishNode);
+  const { walls, grid } = generateRecursiveDivision(array, rows, cols, startNode, finishNode);
+
+  if(walls.length === 0) {
+    setIsRunning(false);
+    return;
+  }
 
   // console.log('generatedMaze', generatedMaze);
-  setArray(array);
-  setTimeout(() => {
-    
-  }, 2000);
-  animateMaze(generatedMaze);
+  setArray(grid);
+  animateMaze(walls);
 }
 
 function visualizeRecursiveBacktracking() {
+  setIsRunning(true);
+
   resetWalls();
   clearPathFinding();
 
@@ -445,30 +469,53 @@ function visualizeRecursiveBacktracking() {
   const startNode = array[startIndex.row][startIndex.col];
   const finishNode = array[finishIndex.row][finishIndex.col];
 
-    const { walls, grid } = generateRecursiveBacktracking(array, startNode, finishNode);
+  const { walls, grid } = generateRecursiveBacktracking(array, startNode, finishNode);
 
-    setArray(grid);
-    animateMaze(walls);
+  if(walls.length === 0) {
+    setIsRunning(false);
+    return;
+  }
   
-
+  setArray(grid);
+  animateMaze(walls);
 }
 
 function visualizeRandomPrims() {
+  setIsRunning(true);
+
+  resetWalls();
+  clearPathFinding();
+
+
   const startNode = array[startIndex.row][startIndex.col];
   const finishNode = array[finishIndex.row][finishIndex.col];
 
   const generatedMaze = generatePrims(array, rows, cols, startNode, finishNode);
 
+  if(generatedMaze.length === 0) {
+    setIsRunning(false);
+    return;
+  }
   // console.log(generatedMaze);
   setArray(array);
   animateMaze(generatedMaze);
 }
 
 function visualizeEller() {
+  setIsRunning(true);
+
+  resetWalls();
+  clearPathFinding();
+
   const startNode = array[startIndex.row][startIndex.col];
   const finishNode = array[finishIndex.row][finishIndex.col];
 
   const generatedMaze = generateEllers(array, startNode, finishNode);
+
+  if(generatedMaze.length === 0) {
+    setIsRunning(false);
+    return;
+  }
 
   // console.log(generatedMaze);
   setArray(array);
@@ -476,11 +523,20 @@ function visualizeEller() {
 }
 
 function visualizeRecusiveDivisonHorizontal() {
+  setIsRunning(true);
+
+  resetWalls();
+  clearPathFinding();
+
   const startNode = array[startIndex.row][startIndex.col];
   const finishNode = array[finishIndex.row][finishIndex.col];
 
   const generatedMaze = RecursiveDivisonHorizontal(array, array.length, array[0].length, startNode, finishNode);
 
+  if(generatedMaze.length === 0) {
+    setIsRunning(false);
+    return;
+  }
   // console.log(generatedMaze);
   setArray(array);
   animateMaze(generatedMaze);
@@ -488,7 +544,6 @@ function visualizeRecusiveDivisonHorizontal() {
 
 const handleMaze  = (e) => {
   e.preventDefault();
-  setIsRunning(true);
 
   if(MazeOptions !== -1) {
     resetWalls();
@@ -549,29 +604,33 @@ function animateMaze(generatedMaze) {
       const node = generatedMaze[i];
       // console.log(node);
         document.getElementById(`node-${node.row}-${node.col}`).classList.add('wall');
-    }, 12 * i);
+    }, speed * i);
 
     if(i === generatedMaze.length - 1) {
       setTimeout(() => {
         console.log('Maze Created');
         setIsRunning(false);
-      }, 12 * i);
+      }, speed * i);
     } 
   }
 
 }
 
-// useEffect(() => { console.log(isRunning);}, [isRunning]);
-
 const Nothing = () => {
   console.log('Nothing');
 }
 
+const changeMazeOption = (e) => {
+  e.preventDefault();
+  setMazeOptions(-1);
+}
+
   return (
-    <div className=" h-full w-full">
-    <div className="flex flex-col md:flex-row justify-start items-center">
+    <div className=" h-full w-full max-w-8xl mx-auto">
+    <div className="flex flex-col md:flex-row justify-start  
+    items-start lg:items-center w-full py-2 lg:py-0">
       
-      <div>
+      <div className='flex-1'>
       <select id="pathfind" className="px-2 text-md font-medium outline-none py-2 border-[#404258]
       bg-transparent  text-[#404258] border-b-2 text-center 
       " value={options} onChange={(e) => setOptions(e.target.value)}>
@@ -582,12 +641,12 @@ const Nothing = () => {
         }
        </select>
 
-      <select className="px-2 text-md font-medium outline-none py-2 border-[#404258] mx-4
+      <select className="px-2 text-md font-medium outline-none py-2 border-[#404258]  lg:mx-4
       bg-transparent  text-[#404258] border-b-2  text-center
       "
       value={MazeOptions}
       onChange={(e) => setMazeOptions(e.target.value)}
-      onClick={handleMaze}
+      onClick={isRunning ? changeMazeOption : handleMaze}
       >
         <option value={-1} className='text-black '>Generate Mazes</option>
         <option value={0}  
@@ -599,24 +658,63 @@ const Nothing = () => {
       </select>
       </div>
 
-      <div className="flex flex-row justify-start items-center mt-4 mb-4 mx-8">
-      <div className='bg-green-500 rounded-full w-10 h-10 flex items-center cursor-pointer justify-center'
+      <div className="flex-1 flex flex-col md:flex-row justify-start items-start  lg:items-center mt-4 mb-2 ">
+        <div className='flex md:flex-col lg:flex-row'>
+        <div className='mx-4 flex items-center'>
+      <div className={`${isRunning ? 'bg-red-500' : 'bg-green-500'} rounded-full w-10 h-10 flex items-center cursor-pointer justify-center shadow-lg`}
       onClick={isRunning ? Nothing : handleRun}
       >
       <FaPlay className="text-white" />
       </div>
-         <div className="bg-sky-500 rounded-full w-10 h-10 flex items-center cursor-pointer justify-center mx-8" 
+      <div className={`${isRunning ? 'bg-gray-200' : 'bg-sky-500'} rounded-full w-10 h-10 flex items-center cursor-pointer justify-center mx-8 shadow-lg`} 
           onClick={isRunning ? Nothing : handleReset }
          >
             <BiReset className="text-xl text-white" />
-          </div>
       </div>
+        </div>
+
+      {/* <div className=''>
+        <p className='text-xl font-medium'>Speed</p>
+        <div className='my-2'>
+          <button onClick={() => setSpeed(20)} className='border-2 px-4 py-2 cursor-pointer hover:bg-sky-500  hover:text-white'>Fast</button>
+          <button onClick={() => setSpeed(50)} className='border-2 px-4 py-2 mx-2 cursor-pointer hover:bg-sky-500  hover:text-white'>Medium</button>
+          <button onClick={() => setSpeed(100)} className='border-2 px-4 py-2 cursor-pointer hover:bg-sky-500  hover:text-white'>Slow</button>
+        </div>
+      </div> */}
+
+      </div>
+
+      <div className='flex items-baseline w-[16em] justify-between py-6 md:py-0'>
+
+        <div className='flex flex-col items-center justify-center'>
+          <div className='w-6 h-6 bg-[#212A3E] border-2 border-[#40513B]'></div>
+          <p className='text-sm font-mono pt-2 pl-1'>Walls</p>
+        </div>
+
+        <div className='flex flex-col items-center justify-center'>
+          <div className='w-6 h-6 bg-[#95bdff] border-2 border-[#40513B]'></div>
+          <p className='text-sm font-mono pt-2 pl-1 text-center w-[4.5em] break-words'>VisitedNodes</p>
+        </div>
+
+        <div className='flex flex-col items-center justify-center'>
+          <div className='w-6 h-6 bg-[#fffe69e6] border-2 border-[#40513B]'></div>
+          <p className='text-sm font-mono pt-2 pl-1 text-center w-[5em] break-words'>ShortestPath</p>
+        </div>
+
+        <div className='flex flex-col items-center justify-center'>
+          <div className='w-6 h-6 bg-[#F1DEC9] border-2 border-[#40513B]'></div>
+          <p className='text-sm font-mono pt-2 pl-1'>backtrack</p>
+        </div>
+
+      </div>
+      </div>
+
       
     </div>
 
 
       {/* create a matrix using table */}
-      <table className='w-full my-4'
+      <table className='w-full my-2 shadow-lg'
       >
       <tbody >
         {array.map((row, rowIndex) => (

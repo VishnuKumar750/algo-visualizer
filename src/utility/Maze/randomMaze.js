@@ -23,7 +23,7 @@ export function generateRecursiveDivision(grid, row, col, startIndex, finishInde
       }
   }
 
-  return walls;
+  return {walls, grid};
 }
 
 function recursiveDivison(maze, rowStart, colStart, rowEnd, colEnd, orientation, boundary) {

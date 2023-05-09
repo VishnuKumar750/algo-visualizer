@@ -2,7 +2,7 @@ import { FaPlay } from 'react-icons/fa'
 import { BiReset } from 'react-icons/bi'
 import { useEffect, useState } from 'react';
 import './sortingAlgorithm.css'
-import SortingAlgorithmLogic from '../utility/sortingAlgorithmLogic';
+import SortingAlgorithmLogic from '../utility/sorting/sortingAlgorithmLogic';
 
 
 function GenerateRandom() {
@@ -74,28 +74,32 @@ const SortingAlgorithm = () => {
 
    useEffect(() => {
       function handleResize() {
-         if(window.innerWidth < 768) {
+         if(window.innerWidth > 320 && window.innerWidth < 768) {
+            if(value > 30) {
+               setValue(30);
+            }
+            setMaxValue(30);
+         } else if(window.innerWidth < 768) {
             if(value > 70) {
                setValue(70);
             }
             setMaxValue(70);
-         } else if(window.innerWidth > 768 && window.innerWidth < 1024) {
-            if(value > 180) {
-               setValue(180);
-            }
-            setMaxValue(180);
          } else if(window.innerWidth < 1024) {
-            if(value > 200) {
-               setValue(200);
+            if(value > 80) {
+               setValue(80);
             }
-            setMaxValue(200);
+            setMaxValue(80);
+         } else if(window.innerWidth < 1280) {
+            if(value > 100) {
+               setValue(100);
+            }
+            setMaxValue(100);
          }
-         else {
-            if(value > 250) {
-               setValue(250);
+         else if(window.innerWidth < 1536) {
+            if(value > 113) {
+               setValue(113);
             }
-
-            setMaxValue(250);
+            setMaxValue(113);
          }
       }
 
@@ -121,9 +125,9 @@ const SortingAlgorithm = () => {
    }
 
    return (
-    <div className=" h-full w-full">
+    <div className=" h-full w-full max-8xl mx-auto py-6">
       <div className="flex flex-row justify-start items-center">
-      <select className="px-2 text-md font-medium outline-none py-2 border-[#404258]
+      <select className="px-2 text-md font-medium outline-none py-2 border-[#404258] 
       bg-transparent  text-[#404258] border-b-2
       " value={options} onChange={(e) => setOptions(e.target.value)} >
          <option value={0} className='text-black'>Bubble Sort</option>
@@ -136,13 +140,13 @@ const SortingAlgorithm = () => {
          
       </select>
 
-      <div className="flex flex-row justify-start items-center mx-12">
+      <div className="flex flex-row justify-start items-center mx-4 md:mx-12">
       {isRunning ? 
-      <div className="bg-red-500 rounded-full w-10 h-10 flex items-center cursor-progress justify-center">
+      <div className="bg-red-500 rounded-full w-10 h-10 flex items-center cursor-progress justify-center shadow-md">
          <FaPlay className="text-white" />
          </div> 
          : 
-      <div className='bg-green-500 rounded-full w-10 h-10 flex items-center cursor-pointer justify-center'
+      <div className='bg-green-500 rounded-full w-10 h-10 flex items-center cursor-pointer justify-center shadow-md'
       onClick={runAlgo}
       >
       <FaPlay className="text-white" />
@@ -152,11 +156,11 @@ const SortingAlgorithm = () => {
 
       {
          isRunning ?
-         <div className="bg-slate-500 rounded-full w-10 h-10 flex items-center cursor-progress justify-center mx-8">
+         <div className="bg-slate-500 rounded-full w-10 h-10 flex items-center cursor-progress justify-center mx-8 shadow-md">
             <BiReset className="text-xl text-white" />
          </div>
          :
-         <div className="bg-sky-500 rounded-full w-10 h-10 flex items-center cursor-pointer justify-center mx-8" onClick={resetArray}>
+         <div className="bg-sky-500 rounded-full w-10 h-10 flex items-center cursor-pointer justify-center mx-8 shadow-md" onClick={resetArray}>
             <BiReset className="text-xl text-white" />
          </div>
 
@@ -166,7 +170,7 @@ const SortingAlgorithm = () => {
       </div>
 
       {/* create histogram for visualization */}
-      <div className="h-[50vh] my-4 border-2 border-slate-200">
+      <div className="h-[50vh] my-4  bg-white shadow-lg ">
          <div className="h-full flex  ">
            {
                array.map((item, index) => {
@@ -203,7 +207,7 @@ const SortingAlgorithm = () => {
       </div>
       </div>
          :
-      <div className="relative pt-12">
+      <div className="relative pt-12 ">
       <input
         type="range"
         min={0}
@@ -212,7 +216,7 @@ const SortingAlgorithm = () => {
         onChange={handleChange}
         className="absolute w-full h-full opacity-0 cursor-pointer"
       />
-      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div className="h-2 bg-gray-200  rounded-full overflow-hidden">
         <div
           className="h-full bg-green-500 rounded-full"
           style={{ width: `${(value) / (maxValue)  * 100}%` }}
